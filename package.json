@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/picofuture/tomo-node-sdk/issues"
   },
-  "homepage": "https://github.com/picofuture/tomo-node-sdk#readme"
+  "homepage": "https://github.com/picofuture/tomo-node-sdk#readme",
+  "dependencies": {
+    "@opentelemetry/sdk-node": "^0.202.0",
+    "detect-runtime": "^1.0.4"
+  }
 }
