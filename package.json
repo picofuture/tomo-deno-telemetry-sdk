@@ -1,0 +1,24 @@
+{
+  "name": "@picofuture/tomo-node-sdk",
+  "version": "0.1.0",
+  "description": "Droppable SDK to initialize Tomo inside repositories",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/picofuture/tomo-node-sdk.git"
+  },
+  "keywords": [
+    "tomo",
+    "observability",
+    "vibecoding"
+  ],
+  "author": "PicoFuture",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/picofuture/tomo-node-sdk/issues"
+  },
+  "homepage": "https://github.com/picofuture/tomo-node-sdk#readme"
+}
