@@ -1,6 +1,5 @@
 import { context, trace, SpanKind } from 'npm:@opentelemetry/api@1.9.0'
 import { getTracer } from './otel/tracers.js'
-import { bufferSpan } from './otel/context.js'
 
 function patchFetch() {
   const originalFetch = globalThis.fetch
@@ -11,18 +10,14 @@ function patchFetch() {
     const url = typeof args[0] === 'string' ? args[0] : args[0]?.url
     const method = args[1]?.method || 'GET'
     const tracer = getTracer()
-    const parent = trace.getSpan(context.active())
 
     const span = tracer.startSpan(`HTTP ${method}`, {
       kind: SpanKind.CLIENT,
-      parent: parent?.spanContext?.(),
       attributes: {
         'http.method': method,
         'http.url': url
       }
     })
-
-    console.log('span', span)
 
     return await context.with(trace.setSpan(context.active(), span), async () => {
       try {
@@ -35,7 +30,6 @@ function patchFetch() {
         throw err
       } finally {
         span.end()
-        bufferSpan(span)
       }
     })
   }
