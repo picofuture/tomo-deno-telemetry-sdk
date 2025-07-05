@@ -1,10 +1,20 @@
+import { setConfig } from "./otel/context";
+import { setupTracer } from "./otel/tracers";
+
+
 class DenoRuntime {
   constructor(config) {
-    this.config = config;
+    if (!config.apiKey) throw new Error('apiKey required')
+
+    setConfig(config)
   }
 
   init() {
-    console.log('Deno runtime initialized');
+    setupTracer()
+
+    patchFetch()
+    
+    patchServe()
   }
 }
 
