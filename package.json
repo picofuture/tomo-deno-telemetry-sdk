@@ -1,14 +1,18 @@
 {
-  "name": "@picofuture/tomo-node-sdk",
-  "version": "0.1.0",
+  "name": "@picofuture/tomo-telemetry-sdk",
+  "version": "0.1.7",
+  "type": "module",
   "description": "Droppable SDK to initialize Tomo inside repositories",
-  "main": "index.js",
+  "main": "src/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/picofuture/tomo-node-sdk.git"
+    "url": "git+ssh://git@github.com/picofuture/tomo-telemetry-sdk.git"
   },
   "keywords": [
     "tomo",
@@ -18,11 +22,10 @@
   "author": "PicoFuture",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/picofuture/tomo-node-sdk/issues"
+    "url": "https://github.com/picofuture/tomo-telemetry-sdk/issues"
   },
-  "homepage": "https://github.com/picofuture/tomo-node-sdk#readme",
+  "homepage": "https://github.com/picofuture/tomo-telemetry-sdk#readme",
   "dependencies": {
-    "@opentelemetry/sdk-node": "^0.202.0",
     "detect-runtime": "^1.0.4"
   }
 }

@@ -1,17 +1,26 @@
-/**
- * @fileoverview Entry point for Tomo Telemetry SDK. Exports createTomo for one-liner setup.
- * @module index
- */
+import { detectRuntime } from 'detect-runtime'
 
-const Tomo = require('./core/tomo');
+import DenoRuntime from './runtime-specific/deno.js'
 
-/**
- * Creates a Tomo Telemetry SDK instance
- * @param {import('./core/tomo').TomoConfig} config - SDK configuration
- * @returns {Tomo} Tomo instance
- */
-function createTomo(config) {
-  return new Tomo(config);
+class TomoTelemetry {
+  constructor(config) {
+    this.config = config
+    this.runtime = detectRuntime()
+  }
+
+  init() {
+    switch (this.runtime) {
+      case 'deno': {
+        const denoRuntime = new DenoRuntime(this.config)
+        denoRuntime.init()
+        break
+      }
+      default:
+        console.error(`Unsupported runtime: ${this.runtime} for Tomo.`)
+    }
+  }
 }
 
-module.exports = createTomo;
+const tomoTelemetry = (config) => new TomoTelemetry(config)
+
+export default tomoTelemetry
