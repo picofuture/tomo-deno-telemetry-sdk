@@ -4,6 +4,7 @@ import { bufferSpan } from './otel/context.js'
 
 function patchFetch() {
   const originalFetch = globalThis.fetch
+  
   if (!originalFetch || originalFetch.__tomoPatched) return
 
   globalThis.fetch = async function (...args) {
@@ -20,6 +21,8 @@ function patchFetch() {
         'http.url': url
       }
     })
+
+    console.log('span', span)
 
     return await context.with(trace.setSpan(context.active(), span), async () => {
       try {

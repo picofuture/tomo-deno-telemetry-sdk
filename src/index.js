@@ -6,7 +6,8 @@ import GeneralRuntime from './runtime-specific/general/index.js'
 class TomoTelemetry {
   constructor(config) {
     this.config = config
-    this.runtime = detectRuntime()
+    this.runtimeEnvironment = detectRuntime()
+    this.runtime = null
   }
 
   init() {
@@ -19,18 +20,23 @@ class TomoTelemetry {
     
     console.log('Intializing telemetry for runtime:', this.runtime)
 
-    switch (this.runtime) {
+    switch (this.runtimeEnvironment) {
       case 'deno': {
         const denoRuntime = new DenoRuntime(this.config)
         denoRuntime.init()
+        this.runtime = denoRuntime
         break
       }
       default:
-        console.warn(`Tomo Telemetry: runtime ${this.runtime} not instrumented yet.`)
+        console.warn(`Tomo Telemetry: runtime ${this.runtimeEnvironment} not instrumented yet.`)
     }
 
     console.log('Tomo Telemetry initialized')
     console.log('--------------------------------')
+  }
+
+  getRuntime() {
+    return this.runtime
   }
 }
 

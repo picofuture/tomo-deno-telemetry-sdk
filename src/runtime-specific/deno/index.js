@@ -1,5 +1,7 @@
-import { setConfig } from "./otel/context";
-import { setupTracer } from "./otel/tracers";
+import { setConfig } from "./otel/config.js";
+import { setupTracer } from "./otel/tracers.js";
+import { patchFetch } from "./patch-fetch.js";
+import { wrapServe } from "./wrap-serve.js";
 
 
 class DenoRuntime {
@@ -13,8 +15,11 @@ class DenoRuntime {
     setupTracer()
 
     patchFetch()
-    
-    patchServe()
+  }
+
+  getWrappedServe(serveFn) {
+    console.log('getWrappedServe', serveFn)
+    return wrapServe(serveFn)
   }
 }
 

@@ -1,14 +1,7 @@
+import { getConfig } from './config.js'
+
 let activeRoot = null
 let spanBuffer = []
-let config = {}
-
-function setConfig(cfg) {
-  config = cfg
-}
-
-function getConfig() {
-  return config
-}
 
 function setActiveRootSpan(span) {
   activeRoot = span
@@ -58,22 +51,22 @@ function flushBuffer() {
     ]
   }
 
-  const apiKey = config.apiKey
+  const apiKey = getConfig().apiKey
   spanBuffer = []
 
-  return fetch('https://collector.picofuture.com/v1/traces', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey
-    },
-    body: JSON.stringify(body)
-  })
+  console.log('body', JSON.stringify(body, null, 2))
+
+  // return fetch('https://collector.picofuture.com/v1/traces', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'x-api-key': apiKey
+  //   },
+  //   body: JSON.stringify(body)
+  // })
 }
 
 export {
-  setConfig,
-  getConfig,
   setActiveRootSpan,
   getActiveRootSpan,
   bufferSpan,
