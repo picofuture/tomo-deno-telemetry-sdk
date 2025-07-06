@@ -1,45 +1,59 @@
-import { detectRuntime } from 'detect-runtime'
+import { setupTracer, getTracer } from "./otel/tracers.js";
+import { wrapServe as _wrapServe } from "./wrap-serve.js";
+import { tracedFetch as _tracedFetch } from "./process-fetch.js";
 
-import DenoRuntime from './runtime-specific/deno/index.js'
-import GeneralRuntime from './runtime-specific/general/index.js'
-
-class TomoTelemetry {
+/**
+ * TomoDenoTelemetry provides tracing utilities for Deno environments.
+ */
+class TomoDenoTelemetry {
+  /**
+   * @param {object} config - { apiKey, serviceName, serviceVersion, collectorUrl }
+   */
   constructor(config) {
-    this.config = config
-    this.runtimeEnvironment = detectRuntime()
-    this.runtime = null
+    if (!config.apiKey) throw new Error('apiKey required')
+    if (!config.serviceName) throw new Error('serviceName required')
+    if (!config.serviceVersion) throw new Error('serviceVersion required')
+    if (!config.collectorUrl) throw new Error('collectorUrl required')
+    this.config = config;
+    this.tracer = null;
   }
 
+  /**
+   * Initializes the tracer and stores the tracer instance.
+   */
   init() {
-    console.log('--------------------------------')
-    console.log('Initializing Tomo Telemetry')
-    console.log('Initializing general runtime telemetry')
-
-    const generalRuntime = new GeneralRuntime(this.config)
-    generalRuntime.init()
-    
-    console.log('Intializing telemetry for runtime:', this.runtime)
-
-    switch (this.runtimeEnvironment) {
-      case 'deno': {
-        const denoRuntime = new DenoRuntime(this.config)
-        denoRuntime.init()
-        this.runtime = denoRuntime
-        break
-      }
-      default:
-        console.warn(`Tomo Telemetry: runtime ${this.runtimeEnvironment} not instrumented yet.`)
-    }
-
-    console.log('Tomo Telemetry initialized')
-    console.log('--------------------------------')
+    setupTracer(this.config.serviceName, this.config.serviceVersion, this.config.apiKey, this.config.collectorUrl)
+    this.tracer = getTracer();
   }
 
-  getRuntime() {
-    return this.runtime
+  /**
+   * Returns the initialized tracer instance.
+   * @returns {import('@opentelemetry/api').Tracer|null} The tracer instance or null if not initialized
+   */
+  getTracer() {
+    return this.tracer;
+  }
+
+  /**
+   * Wraps a Deno serve function with tracing. Accepts options (e.g., parentTrace).
+   * @param {function} serveFn - The Deno serve function
+   * @param {object} [options] - Options including parentTrace
+   * @returns {function}
+   */
+  wrapServe(serveFn, options) {
+    return _wrapServe(serveFn, options);
+  }
+
+  /**
+   * Drop-in replacement for fetch with tracing. Accepts url, options, and optional parentTrace.
+   * @param {RequestInfo} url
+   * @param {RequestInit} [options]
+   * @param {object} [parentTrace]
+   * @returns {Promise<Response>}
+   */
+  tracedFetch(url, options, parentTrace) {
+    return _tracedFetch(url, options, parentTrace);
   }
 }
 
-const tomoTelemetry = (config) => new TomoTelemetry(config)
-
-export default tomoTelemetry
+export default TomoDenoTelemetry;
