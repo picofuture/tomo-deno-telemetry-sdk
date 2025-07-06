@@ -6,13 +6,18 @@ import { wrapServe } from "./wrap-serve.js";
 class DenoRuntime {
   constructor(config) {
     if (!config.apiKey) throw new Error('apiKey required')
-    this.serviceName = config.serviceName || 'unknown_service'
-    this.serviceVersion = config.serviceVersion || '0.0.1'
+    if (!config.serviceName) throw new Error('serviceName required')
+    if (!config.serviceVersion) throw new Error('serviceVersion required')
+    if (!config.collectorUrl) throw new Error('collectorUrl required')
+
+    this.serviceName = config.serviceName
+    this.serviceVersion = config.serviceVersion
+    this.collectorUrl = config.collectorUrl
     this.apiKey = config.apiKey
   }
 
   init() {
-    setupTracer(this.serviceName, this.serviceVersion, this.apiKey)
+    setupTracer(this.serviceName, this.serviceVersion, this.apiKey, this.collectorUrl)
     patchFetch()
   }
 

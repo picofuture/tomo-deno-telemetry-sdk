@@ -1,12 +1,12 @@
 import { trace } from 'npm:@opentelemetry/api@1.9.0'
-import { BasicTracerProvider, BatchSpanProcessor } from 'npm:@opentelemetry/sdk-trace-base@2.0.1'
+import { BasicTracerProvider, BatchSpanProcessor, ConsoleSpanExporter } from 'npm:@opentelemetry/sdk-trace-base@2.0.1'
 import { OTLPTraceExporter } from 'npm:@opentelemetry/exporter-trace-otlp-http@0.202.0'
 import { resourceFromAttributes, defaultResource } from 'npm:@opentelemetry/resources@2.0.1'
 import { SemanticResourceAttributes } from 'npm:@opentelemetry/semantic-conventions@1.34.0'
 
 let tracer
 
-function setupTracer(serviceName, serviceVersion, apiKey) {
+function setupTracer(serviceName, serviceVersion, apiKey, collectorUrl) {
   const name = serviceName || 'unknown_service'
   const version = serviceVersion || '0.0.1'
   const resource = defaultResource().merge(resourceFromAttributes({
@@ -14,17 +14,20 @@ function setupTracer(serviceName, serviceVersion, apiKey) {
     [SemanticResourceAttributes.SERVICE_VERSION]: version
   }))
   const traceExporter = new OTLPTraceExporter({
-    url: 'https://collector.picofuture.com/v1/traces',
+    url: collectorUrl,
     headers: {
       'x-api-key': apiKey
     }
   })
-  const processor = new BatchSpanProcessor(traceExporter)
+  const consoleExporter = new ConsoleSpanExporter();
+  
+  const traceProcessor = new BatchSpanProcessor(traceExporter)
+  const consoleProcessor = new BatchSpanProcessor(consoleExporter)
 
   const provider = new BasicTracerProvider(
     { 
       resource,
-      spanProcessors: [processor]
+      spanProcessors: [traceProcessor, consoleProcessor]
     }
   )
 
