@@ -2,6 +2,21 @@ import { setupTracer, getTracer } from "./otel/tracers.js";
 import { wrapServe as _wrapServe } from "./wrap-serve.js";
 import { tracedFetch as _tracedFetch } from "./process-fetch.js";
 
+// Polyfill for Node.js timer unref() in Deno
+function patchTimerUnref() {
+  const timers = [globalThis.setTimeout, globalThis.setInterval];
+  for (const timer of timers) {
+    const original = timer;
+    globalThis[timer.name] = function (...args) {
+      const handle = original.apply(this, args);
+      if (typeof handle.unref !== "function") {
+        handle.unref = () => handle;
+      }
+      return handle;
+    };
+  }
+}
+
 /**
  * TomoDenoTelemetry provides tracing utilities for Deno environments.
  */
@@ -22,6 +37,7 @@ class TomoDenoTelemetry {
    * Initializes the tracer and stores the tracer instance.
    */
   init() {
+    patchTimerUnref();
     setupTracer(this.config.serviceName, this.config.serviceVersion, this.config.apiKey, this.config.collectorUrl)
     this.tracer = getTracer();
   }
