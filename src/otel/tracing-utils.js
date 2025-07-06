@@ -4,15 +4,16 @@ import { getTracer } from './tracers.js'
 /**
  * Runs an async function within a span context, handling status and errors.
  * @param {string} name - Span name
- * @param {object} options - Span options (kind, attributes, parent)
+ * @param {object} options - Span options (kind, attributes, parentContext)
  * @param {function} fn - Async function to run within the span
  * @returns {Promise<*>}
  */
 export async function runWithSpan(name, options, fn) {
   const tracer = getTracer()
-  const span = tracer.startSpan(name, options)
+  const parentContext = options && options.parentContext ? options.parentContext : context.active()
+  const span = tracer.startSpan(name, options, parentContext)
   try {
-    return await context.with(trace.setSpan(context.active(), span), async () => {
+    return await context.with(trace.setSpan(parentContext, span), async () => {
       return await fn(span)
     })
   } catch (err) {
