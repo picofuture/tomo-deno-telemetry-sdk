@@ -1,3 +1,8 @@
+/**
+ * Tracing utility functions for Tomo Deno Telemetry SDK.
+ * Includes helpers for running code within spans and setting HTTP span status.
+ * @module otel/tracing-utils
+ */
 import { context, trace, SpanKind } from 'npm:@opentelemetry/api@1.9.0'
 import { getTracer } from './tracers.js'
 

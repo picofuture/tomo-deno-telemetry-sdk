@@ -1,3 +1,8 @@
+/**
+ * Traced fetch implementation for Tomo Deno Telemetry SDK.
+ * Provides a drop-in replacement for fetch with OpenTelemetry tracing.
+ * @module process-fetch
+ */
 import { SpanKind } from 'npm:@opentelemetry/api@1.9.0'
 import { runWithSpan, setHttpSpanStatus } from './otel/tracing-utils.js'
 

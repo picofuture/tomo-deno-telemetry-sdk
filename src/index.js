@@ -1,3 +1,8 @@
+/**
+ * Entry point for Tomo Deno Telemetry SDK.
+ * Exports the TomoDenoTelemetry class and polyfills for Deno compatibility.
+ * @module index
+ */
 import "./polyfills/settimeout.js";
 import "./polyfills/setinterval.js";
 

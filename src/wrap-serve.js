@@ -2,10 +2,15 @@ import { SpanKind, SpanStatusCode, context, trace } from 'npm:@opentelemetry/api
 import { getTracer } from './otel/tracers.js'
 
 /**
+ * Provides a wrapper to add tracing to Deno serve functions.
+ * @module wrap-serve
+ */
+
+/**
  * Wraps a Deno serve function with tracing. Each HTTP request is wrapped in a root span and context.
- * The handler receives (req, rootSpan, rootContext) and should pass rootContext to all downstream traced operations.
- * @param {function} serveFn - The Deno serve function to wrap (e.g., from std/http)
- * @returns {function} A serve function with tracing enabled
+ * The handler receives (req, rootContext) and should pass rootContext to all downstream traced operations.
+ * @param {function(function(Request, object): Promise<Response>, object=): unknown} serveFn - The Deno serve function to wrap (e.g., from std/http)
+ * @returns {function(function(Request, object): Promise<Response>, object=): unknown} A serve function with tracing enabled
  */
 function wrapServe(serveFn) {
   return function tracedServe(handler, opts) {
