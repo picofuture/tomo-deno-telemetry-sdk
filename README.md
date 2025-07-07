@@ -29,16 +29,13 @@ tomoDenoTelemetry.init();
 2. **Wrap the Deno `serve` function (optional, for tracing HTTP requests):**
 
 ```ts
-let wrapServe = serve;
-if (tomoDenoTelemetry?.wrapServe) {
-  wrapServe = tomoDenoTelemetry.wrapServe(serve);
-}
+const wrappedServe = tomoDenoTelemetry.wrapServe(serve);
 ```
 
 3. **Use `tracedFetch` for instrumented HTTP requests:**
 
 ```ts
-wrapServe(async (req, rootContext) => {
+wrappedServe(async (req, rootContext) => {
   // Traced fetch to external API
   const response = await tomoDenoTelemetry.tracedFetch(
     "https://jsonplaceholder.typicode.com/posts/1",
