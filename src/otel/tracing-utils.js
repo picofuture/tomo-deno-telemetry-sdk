@@ -3,7 +3,7 @@
  * Includes helpers for running code within spans and setting HTTP span status.
  * @module otel/tracing-utils
  */
-import { context, trace, SpanKind } from 'npm:@opentelemetry/api@1.9.0'
+import { context, trace, SpanStatusCode } from 'npm:@opentelemetry/api@1.9.0'
 import { getTracer } from './tracers.js'
 
 /**
@@ -22,7 +22,7 @@ export async function runWithSpan(name, options, fn) {
       return await fn(span)
     })
   } catch (err) {
-    span.setStatus({ code: 2 })
+    span.setStatus({ code: SpanStatusCode.ERROR })
     throw err
   } finally {
     span.end()
@@ -30,13 +30,13 @@ export async function runWithSpan(name, options, fn) {
 }
 
 /**
- * Sets HTTP attributes and status on a span based on response.
- * @param {object} span - The span
- * @param {object} res - The HTTP response
+ * Sets multiple attributes on the given OpenTelemetry span.
+ *
+ * @param {import('@opentelemetry/api').Span} span - The span to set attributes on.
+ * @param {Object.<string, any>} attributes - An object containing key-value pairs to set as attributes on the span.
  */
-export function setHttpSpanStatus(span, res) {
-  if (res && typeof res.status === 'number') {
-    span.setAttribute('http.status_code', res.status)
-    span.setStatus({ code: res.status >= 400 ? 2 : 1 })
+export function setSpanAttributes(span, attributes) {
+  for (const [key, value] of Object.entries(attributes)) {
+    span.setAttribute(key, value)
   }
-} 
+}
