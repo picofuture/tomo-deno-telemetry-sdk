@@ -15,7 +15,7 @@ import { runWithSpan, setSpanAttributes } from './otel/tracing-utils.js'
 function setHttpSpanStatus(span, res) {
   if (res && typeof res.status === 'number') {
     setSpanAttributes(span, {
-      'http.status_code': res.status
+      'httpStatusCode': res.status
     })
     span.setStatus({ code: res.status >= 400 ? SpanStatusCode.ERROR : SpanStatusCode.OK })
   }
@@ -51,8 +51,8 @@ async function setHTTPResponseBody(span, res) {
   }
 
   setSpanAttributes(span, {
-    'http.response': bodyText,
-    'http.response_type': responseType
+    'httpResponse': bodyText,
+    'httpResponseType': responseType
   })
 }
 
@@ -118,11 +118,11 @@ export async function tracedFetch(url, options, parentContext) {
   return runWithSpan(`tomo.http.request`, {
     kind: SpanKind.CLIENT,
     attributes: {
-      'http.method': method,
-      'http.url': typeof url === 'string' ? url : url.url,
-      ...(requestBody !== undefined ? { 'http.request_body': requestBody } : {}),
-      ...(requestBodyType !== undefined ? { 'http.request_body_type': requestBodyType } : {}),
-      ...(queryParams !== undefined ? { 'http.query_params': queryParams } : {})
+      'httpMethod': method,
+      'httpUrl': typeof url === 'string' ? url : url.url,
+      ...(requestBody !== undefined ? { 'httpRequestBody': requestBody } : {}),
+      ...(requestBodyType !== undefined ? { 'httpRequestBodyType': requestBodyType } : {}),
+      ...(queryParams !== undefined ? { 'httpQueryParams': queryParams } : {})
     },
     parentContext
   }, async (span) => {
@@ -133,8 +133,8 @@ export async function tracedFetch(url, options, parentContext) {
       return res
     } catch (err) {
       setSpanAttributes(span, {
-        'http.error': err && err.message ? err.message : String(err),
-        'http.status_code': err && err.status ? err.status : 500
+        'httpError': err && err.message ? err.message : String(err),
+        'httpStatusCode': err && err.status ? err.status : 500
       })
       span.setStatus({ code: SpanStatusCode.ERROR })
       throw err
