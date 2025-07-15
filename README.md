@@ -8,7 +8,7 @@ Import the SDK and Deno's standard HTTP server:
 
 ```ts
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
-import TomoDenoTelemetry from "https://esm.sh/@picofuture/tomo-deno-telemetry-sdk@0.1.14";
+import TomoDenoTelemetry from "https://esm.sh/@picofuture/tomo-deno-telemetry-sdk@latest";
 ```
 
 ## Usage
@@ -17,10 +17,11 @@ import TomoDenoTelemetry from "https://esm.sh/@picofuture/tomo-deno-telemetry-sd
 
 ```ts
 const tomoDenoTelemetry = new TomoDenoTelemetry({
-  apiKey: "YOUR_API_KEY",
+  debug: false,
+  apiKey: "your-api-key",
   serviceName: "your-service-name",
-  serviceVersion: "1.0.0",
-  collectorUrl: "http://localhost:8080/ingest",
+  serviceVersion: "your-service-version",
+  collectorUrl: "your-collector-url",
 });
 ```
 
@@ -30,18 +31,16 @@ const tomoDenoTelemetry = new TomoDenoTelemetry({
 const wrappedServe = tomoDenoTelemetry.wrapServe(serve);
 ```
 
-3. **Use `tracedFetch` for instrumented HTTP requests:**
+3. **Use `wrappedServe` instead of default Deno's serve:**
 
 ```ts
 wrappedServe(async (req, rootContext) => {
-  // Traced fetch to external API
-  const response = await tomoDenoTelemetry.tracedFetch(
+  const response = await fetch(
     "https://jsonplaceholder.typicode.com/posts/1",
     {
       method: "GET",
       headers: { "Accept": "application/json" },
-    },
-    rootContext,
+    }
   );
 
   const data = await response.json();
@@ -55,10 +54,11 @@ wrappedServe(async (req, rootContext) => {
 
 ## Features
 - Automatic tracing for HTTP server requests (when using `wrapServe`)
-- Traced outgoing HTTP requests via `tracedFetch`
+- Automatic tracing of outgoing HTTP requests
 - Easy integration with OpenTelemetry-compatible collectors
 
 ## Configuration
+- `debug`: Enable/Disable console debugging (required)
 - `apiKey`: Your telemetry API key (required)
 - `serviceName`: Name of your service (required)
 - `serviceVersion`: Version of your service (required)
