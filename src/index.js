@@ -22,7 +22,10 @@ class TomoDenoTelemetry {
     if (!config.serviceName) throw new Error('serviceName required')
     if (!config.serviceVersion) throw new Error('serviceVersion required')
     if (!config.collectorUrl) throw new Error('collectorUrl required')
-    if (!config.debug) throw new Error('debug required')
+
+    if (config.debug === undefined) {
+      config.debug = false;
+    }
 
     setConfig(config);
 
