@@ -34,7 +34,7 @@ const wrappedServe = tomoDenoTelemetry.wrapServe(serve);
 3. **Use `wrappedServe` instead of default Deno's serve:**
 
 ```ts
-wrappedServe(async (req, rootContext) => {
+wrappedServe(async (req) => {
   const response = await fetch(
     "https://jsonplaceholder.typicode.com/posts/1",
     {
