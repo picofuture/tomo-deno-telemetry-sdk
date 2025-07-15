@@ -37,8 +37,6 @@ function setupTracer() {
     new BatchSpanProcessor(traceExporter)
   ];
 
-  console.log('config', config)
-
   if (config.debug) {
     const consoleExporter = new ConsoleSpanExporter();
 
