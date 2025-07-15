@@ -1,6 +1,6 @@
 {
   "name": "@picofuture/tomo-deno-telemetry-sdk",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "type": "module",
   "description": "Droppable SDK to initialize to instrument Deno applications. It collects traces and sends them to the specified collector URL. It follows the OpenTelemetry specification.",
   "main": "src/index.js",

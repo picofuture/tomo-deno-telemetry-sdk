@@ -23,14 +23,9 @@ class TomoDenoTelemetry {
     if (!config.serviceVersion) throw new Error('serviceVersion required')
     if (!config.collectorUrl) throw new Error('collectorUrl required')
     this.config = config;
-    this.tracer = null;
-  }
 
-  /**
-   * Initializes the tracer and stores the tracer instance.
-   */
-  init() {
     setupTracer(this.config.serviceName, this.config.serviceVersion, this.config.apiKey, this.config.collectorUrl)
+
     this.tracer = getTracer();
   }
 
