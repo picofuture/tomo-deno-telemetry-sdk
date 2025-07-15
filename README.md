@@ -22,8 +22,6 @@ const tomoDenoTelemetry = new TomoDenoTelemetry({
   serviceVersion: "1.0.0",
   collectorUrl: "http://localhost:8080/ingest",
 });
-
-tomoDenoTelemetry.init();
 ```
 
 2. **Wrap the Deno `serve` function (optional, for tracing HTTP requests):**
