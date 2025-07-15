@@ -33,14 +33,18 @@ function setupTracer() {
     }
   })
 
-  const exporters = [];
+  const exporters = [
+    new BatchSpanProcessor(traceExporter)
+  ];
+
+  console.log('config', config)
 
   if (config.debug) {
-    exporters.push(new ConsoleSpanExporter());
+    const consoleExporter = new ConsoleSpanExporter();
+
+    exporters.push(new BatchSpanProcessor(consoleExporter));
   }
   
-  exporters.push(new BatchSpanProcessor(traceExporter))
-
   const provider = new BasicTracerProvider(
     { 
       resource,
