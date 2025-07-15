@@ -5,6 +5,7 @@
  */
 import { SpanKind, SpanStatusCode } from 'npm:@opentelemetry/api@1.9.0'
 import { runWithSpan, setSpanAttributes } from './otel/tracing-utils.js'
+import { getConfig } from './store/config-store.js'
 
 
 /**
@@ -99,45 +100,68 @@ function extractQueryParams(url) {
 }
 
 /**
- * Drop-in replacement for fetch with OpenTelemetry tracing.
- * Traces HTTP method, URL, request body, and (for GET) query params.
- * @param {RequestInfo} url - The resource to fetch (string or Request)
- * @param {RequestInit} [options] - Fetch options (method, headers, body, etc.)
- * @param {object} parentContext - Parent context for trace propagation (required)
- * @returns {Promise<Response>} The fetch response
+ * Patches globalThis.fetch to add OpenTelemetry tracing.
+ * @param {object} config - Configuration object (must include collectorUrl)
  */
-export async function tracedFetch(url, options, parentContext) {
-  const method = options?.method || (typeof url === 'object' && url.method) || 'GET'
-  // --- Request body tracing ---
-  const { body: requestBody, type: requestBodyType } = extractRequestBody(options);
-  // --- Query params for GET ---
-  let queryParams = undefined;
-  if (method.toUpperCase() === 'GET') {
-    queryParams = extractQueryParams(url);
-  }
-  return runWithSpan(`tomo.http.request`, {
-    kind: SpanKind.CLIENT,
-    attributes: {
-      'httpMethod': method,
-      'httpUrl': typeof url === 'string' ? url : url.url,
-      ...(requestBody !== undefined ? { 'httpRequestBody': requestBody } : {}),
-      ...(requestBodyType !== undefined ? { 'httpRequestBodyType': requestBodyType } : {}),
-      ...(queryParams !== undefined ? { 'httpQueryParams': queryParams } : {})
-    },
-    parentContext
-  }, async (span) => {
-    try {
-      const res = await fetch(url, options)
-      setHttpSpanStatus(span, res)
-      await setHTTPResponseBody(span, res)
-      return res
-    } catch (err) {
-      setSpanAttributes(span, {
-        'httpError': err && err.message ? err.message : String(err),
-        'httpStatusCode': err && err.status ? err.status : 500
-      })
-      span.setStatus({ code: SpanStatusCode.ERROR })
-      throw err
+export function patchFetch(parentContext) {
+  if (globalThis.__patchedFetch) return;
+
+  const config = getConfig();
+  
+  const originalFetch = globalThis.fetch;
+  const ingestEndpoint = config.collectorUrl;
+
+  globalThis.fetch = async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+
+    // Skip tracing the trace ingestion endpoint
+    if (url.includes(ingestEndpoint) || !parentContext) {
+      try {
+        return await originalFetch(input, init);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     }
-  })
+
+    const method = init?.method || (typeof input === 'object' && input.method) || 'GET';
+    
+    // --- Request body tracing ---
+    const { body: requestBody, type: requestBodyType } = extractRequestBody(init);
+    
+    // --- Query params for GET ---
+    let queryParams = undefined;
+    
+    if (method.toUpperCase() === 'GET') {
+      queryParams = extractQueryParams(input);
+    }
+    
+    return runWithSpan(`tomo.http.request`, {
+      kind: SpanKind.CLIENT,
+      attributes: {
+        'httpMethod': method,
+        'httpUrl': url,
+        ...(requestBody !== undefined ? { 'httpRequestBody': requestBody } : {}),
+        ...(requestBodyType !== undefined ? { 'httpRequestBodyType': requestBodyType } : {}),
+        ...(queryParams !== undefined ? { 'httpQueryParams': queryParams } : {})
+      },
+      parentContext
+    }, async (span) => {
+      try {
+        const res = await originalFetch(input, init);
+        setHttpSpanStatus(span, res);
+        await setHTTPResponseBody(span, res);
+        return res;
+      } catch (err) {
+        setSpanAttributes(span, {
+          'httpError': err && err.message ? err.message : String(err),
+          'httpStatusCode': err && err.status ? err.status : 500
+        });
+        span.setStatus({ code: SpanStatusCode.ERROR });
+        throw err;
+      }
+    });
+  };
+
+  globalThis.__patchedFetch = true;
 } 

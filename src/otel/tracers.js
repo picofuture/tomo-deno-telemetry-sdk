@@ -3,6 +3,7 @@ import { BasicTracerProvider, BatchSpanProcessor, ConsoleSpanExporter } from 'np
 import { OTLPTraceExporter } from 'npm:@opentelemetry/exporter-trace-otlp-http@0.202.0'
 import { resourceFromAttributes } from 'npm:@opentelemetry/resources@2.0.1'
 import { SemanticResourceAttributes } from 'npm:@opentelemetry/semantic-conventions@1.34.0'
+import { getConfig } from '../store/config-store.js'
 
 let tracer
 
@@ -14,42 +15,42 @@ let tracer
 
 /**
  * Sets up the OpenTelemetry tracer provider and exporters.
- * @param {string} serviceName - Name of the service.
- * @param {string} serviceVersion - Version of the service.
- * @param {string} apiKey - API key for the collector.
- * @param {string} collectorUrl - URL of the OTLP collector endpoint.
  */
-function setupTracer(serviceName, serviceVersion, apiKey, collectorUrl) {
-  const name = serviceName || 'unknown_service'
-  const version = serviceVersion || '0.0.1'
+function setupTracer() {
+  const config = getConfig();
+
   const resource = resourceFromAttributes({
-    [SemanticResourceAttributes.SERVICE_NAME]: name,
-    [SemanticResourceAttributes.SERVICE_VERSION]: version,
+    [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName,
+    [SemanticResourceAttributes.SERVICE_VERSION]: config.serviceVersion,
     [SemanticResourceAttributes.TELEMETRY_SDK_LANGUAGE]: 'deno',
     [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: 'tomo-deno-telemetry-sdk',
     [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: '0.1.14'
   })
   const traceExporter = new OTLPTraceExporter({
-    url: collectorUrl,
+    url: config.collectorUrl,
     headers: {
-      'x-api-key': apiKey
+      'x-api-key': config.apiKey
     }
   })
-  const consoleExporter = new ConsoleSpanExporter();
+
+  const exporters = [];
+
+  if (config.debug) {
+    exporters.push(new ConsoleSpanExporter());
+  }
   
-  const traceProcessor = new BatchSpanProcessor(traceExporter)
-  const consoleProcessor = new BatchSpanProcessor(consoleExporter)
+  exporters.push(new BatchSpanProcessor(traceExporter))
 
   const provider = new BasicTracerProvider(
     { 
       resource,
-      spanProcessors: [traceProcessor, consoleProcessor]
+      spanProcessors: exporters
     }
   )
 
   trace.setGlobalTracerProvider(provider)
 
-  tracer = trace.getTracer(name)
+  tracer = trace.getTracer(config.serviceName)
 }
 
 /**

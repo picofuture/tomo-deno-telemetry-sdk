@@ -1,5 +1,6 @@
 import { SpanKind, SpanStatusCode, context, trace } from 'npm:@opentelemetry/api@1.9.0'
 import { getTracer } from './otel/tracers.js'
+import { patchFetch } from './patch-fetch.js'
 
 /**
  * Provides a wrapper to add tracing to Deno serve functions.
@@ -25,7 +26,9 @@ function wrapServe(serveFn) {
       })
       const rootContext = trace.setSpan(context.active(), rootSpan)
       try {
-        return await handler(req, rootContext)
+        patchFetch(rootContext);
+
+        return await handler(req)
       } catch (err) {
         rootSpan.setStatus({ code: SpanStatusCode.ERROR })
         throw err

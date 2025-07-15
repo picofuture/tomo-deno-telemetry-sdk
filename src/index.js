@@ -8,7 +8,7 @@ import "./polyfills/setinterval.js";
 
 import { setupTracer, getTracer } from "./otel/tracers.js";
 import { wrapServe as _wrapServe } from "./wrap-serve.js";
-import { tracedFetch as _tracedFetch } from "./process-fetch.js";
+import { setConfig } from "./store/config-store.js";
 
 /**
  * TomoDenoTelemetry provides tracing utilities for Deno environments.
@@ -22,9 +22,11 @@ class TomoDenoTelemetry {
     if (!config.serviceName) throw new Error('serviceName required')
     if (!config.serviceVersion) throw new Error('serviceVersion required')
     if (!config.collectorUrl) throw new Error('collectorUrl required')
-    this.config = config;
+    if (!config.debug) throw new Error('debug required')
 
-    setupTracer(this.config.serviceName, this.config.serviceVersion, this.config.apiKey, this.config.collectorUrl)
+    setConfig(config);
+
+    setupTracer()
 
     this.tracer = getTracer();
   }
@@ -45,17 +47,6 @@ class TomoDenoTelemetry {
    */
   wrapServe(serveFn, options) {
     return _wrapServe(serveFn, options);
-  }
-
-  /**
-   * Drop-in replacement for fetch with tracing. Accepts url, options, and optional parentTrace.
-   * @param {RequestInfo} url
-   * @param {RequestInit} [options]
-   * @param {object} [parentTrace]
-   * @returns {Promise<Response>}
-   */
-  tracedFetch(url, options, parentTrace) {
-    return _tracedFetch(url, options, parentTrace);
   }
 }
 
