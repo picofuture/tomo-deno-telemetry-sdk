@@ -8,7 +8,7 @@ Import the SDK and Deno's standard HTTP server:
 
 ```ts
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
-import TomoDenoTelemetry from "https://esm.sh/@picofuture/tomo-deno-telemetry-sdk@latest";
+import TomoDenoTelemetry from "https://esm.sh/@get-tomo/tomo-deno-telemetry-sdk@latest";
 ```
 
 ## Usage

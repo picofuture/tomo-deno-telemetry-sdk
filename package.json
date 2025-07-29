@@ -1,6 +1,6 @@
 {
-  "name": "@picofuture/tomo-deno-telemetry-sdk",
-  "version": "0.1.27",
+  "name": "@get-tomo/tomo-deno-telemetry-sdk",
+  "version": "0.1.28",
   "type": "module",
   "description": "Droppable SDK to initialize to instrument Deno applications. It collects traces and sends them to the specified collector URL. It follows the OpenTelemetry specification.",
   "main": "src/index.js",
@@ -12,17 +12,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/picofuture/tomo-deno-telemetry-sdk.git"
+    "url": "git+ssh://git@github.com/get-tomo/tomo-deno-telemetry-sdk.git"
   },
   "keywords": [
     "tomo",
     "observability",
     "vibecoding"
   ],
-  "author": "PicoFuture",
+  "author": "Tomo AI",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/picofuture/tomo-deno-telemetry-sdk/issues"
+    "url": "https://github.com/get-tomo/tomo-deno-telemetry-sdk/issues"
   },
-  "homepage": "https://github.com/picofuture/tomo-deno-telemetry-sdk#readme"
+  "homepage": "https://github.com/get-tomo/tomo-deno-telemetry-sdk#readme"
 }
